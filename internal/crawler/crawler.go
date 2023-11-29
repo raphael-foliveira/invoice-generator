@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
@@ -25,7 +26,7 @@ func readInvoiceData() (*InvoiceData, error) {
 func getInvoicePage() *rod.Page {
 	browser := rod.New().MustConnect().MustPage("")
 	downloadPath := os.Args[1]
-	_ = proto.PageSetDownloadBehavior{
+	proto.PageSetDownloadBehavior{
 		Behavior:     proto.PageSetDownloadBehaviorBehaviorAllow,
 		DownloadPath: downloadPath,
 	}.Call(browser)
@@ -79,6 +80,7 @@ func Run() error {
 	fillInvoiceData(page, invoiceData)
 	fmt.Println("Downloading invoice")
 	clickDownload(page)
+	time.Sleep(3 * time.Second)
 	fmt.Println("Closing")
 	return page.Close()
 }

@@ -10,4 +10,4 @@ build-windows:
 	GOOS=windows go build -o dist/invgen.exe cmd/main.go
 
 build-macos:
-	GOOS=darwin go build -o dist/invgen cmd/main.go
+	GOOS=darwin go build -o dist/invgen.darwin cmd/main.go
