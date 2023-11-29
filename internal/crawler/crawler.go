@@ -40,9 +40,10 @@ func readInvoiceData() (*InvoiceData, error) {
 
 func getInvoicePage() *rod.Page {
 	browser := rod.New().MustConnect().MustPage("")
+	downloadPath := os.Args[1]
 	_ = proto.PageSetDownloadBehavior{
 		Behavior:     proto.PageSetDownloadBehaviorBehaviorAllow,
-		DownloadPath: "./",
+		DownloadPath: downloadPath,
 	}.Call(browser)
 	return browser.Browser().MustPage(invoiceUrl)
 }
