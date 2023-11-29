@@ -10,5 +10,7 @@
     "amount": "100000000",
     "dueDate": "15/02/2023",
     "serviceTitle": "Spam Eggs",
-    "serviceDescription": "Foo Bar Baz Qux Garply Fredo"
+    "serviceDescription": "Foo Bar Baz Qux Garply Fredo",
+    "swift": "123123123",
+    "iban": "123123123"
 }

@@ -5,26 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
 )
-
-type InvoiceData struct {
-	InvoiceCode        int    `json:"invoiceCode"`
-	Provider           string `json:"provider"`
-	CNPJ               string `json:"cnpj"`
-	Address            string `json:"address"`
-	Email              string `json:"email"`
-	Client             string `json:"client"`
-	ClientCNPJ         string `json:"clientCnpj"`
-	Currency           string `json:"currency"`
-	Amount             string `json:"amount"`
-	DueDate            string `json:"dueDate"`
-	ServiceTitle       string `json:"serviceTitle"`
-	ServiceDescription string `json:"serviceDescription"`
-}
 
 var invoiceUrl = "https://invoice.agilize.com.br/"
 
@@ -69,6 +53,8 @@ func fillInvoiceData(page *rod.Page, invoiceData *InvoiceData) {
 	page.MustElement("#fatura-vencimento").MustInput(invoiceData.DueDate)
 	page.MustElement(`[name="serviceTitle"]`).MustInput(invoiceData.ServiceTitle)
 	page.MustElement("#description").MustInput(invoiceData.ServiceDescription)
+	page.MustElement(`[name="swiftCode"]`).MustInput(invoiceData.Swift)
+	page.MustElement(`[name="ibanCode"]`).MustInput(invoiceData.Iban)
 }
 
 func clickDownload(page *rod.Page) {
@@ -93,7 +79,6 @@ func Run() error {
 	fillInvoiceData(page, invoiceData)
 	fmt.Println("Downloading invoice")
 	clickDownload(page)
-	time.Sleep(5 * time.Second)
 	fmt.Println("Closing")
 	return page.Close()
 }
