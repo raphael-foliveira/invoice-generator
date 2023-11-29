@@ -1,0 +1,14 @@
+{
+    "invoiceCode": 100,
+    "provider": "Foo",
+    "cnpj": "12123123/0001",
+    "address": "Bar baz",
+    "email": "qux@garply.com",
+    "client": "spam",
+    "clientCnpj": "32321321",
+    "currency": "R$",
+    "amount": "100000000",
+    "dueDate": "15/02/2023",
+    "serviceTitle": "Spam Eggs",
+    "serviceDescription": "Foo Bar Baz Qux Garply Fredo"
+}
