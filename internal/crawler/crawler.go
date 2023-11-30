@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,74 +13,75 @@ import (
 
 var invoiceUrl = "https://invoice.agilize.com.br/"
 
-func readInvoiceData() (*InvoiceData, error) {
-	b, err := os.ReadFile("config.json")
-	if err != nil {
-		fmt.Println("Invoice data must be provided in config.json")
-		return nil, err
-	}
-	invoiceData := new(InvoiceData)
-	return invoiceData, json.Unmarshal(b, invoiceData)
+type crawler struct {
+	invoiceData  InvoiceData
+	downloadPath string
+	page         *rod.Page
 }
 
-func getInvoicePage() *rod.Page {
+func NewCrawler(invoiceData *InvoiceData, downloadPath string) *crawler {
+	c := &crawler{
+		invoiceData:  *invoiceData,
+		downloadPath: downloadPath,
+	}
+	c.mustGetInvoicePage()
+	return c
+}
+
+func (c *crawler) mustGetInvoicePage() {
 	browser := rod.New().MustConnect().MustPage("")
 	downloadPath := os.Args[1]
 	proto.PageSetDownloadBehavior{
 		Behavior:     proto.PageSetDownloadBehaviorBehaviorAllow,
 		DownloadPath: downloadPath,
 	}.Call(browser)
-	return browser.Browser().MustPage(invoiceUrl)
+	c.page = browser.Browser().MustPage(invoiceUrl)
 }
 
-func fillInvoiceData(page *rod.Page, invoiceData *InvoiceData) {
-	page.MustElement(`[name="invoiceCode"]`).MustInput(strconv.Itoa(invoiceData.InvoiceCode))
-	page.MustElement("#companieName").MustInput(invoiceData.Provider)
-	page.MustElement(`[data-testid="cnpj"]`).MustInput(invoiceData.CNPJ)
-	page.MustElement("#address").MustInput(invoiceData.Address)
-	page.MustElement("#client-email").MustInput(invoiceData.Email)
-	page.MustElement("#customerName").MustInput(invoiceData.Client)
-	page.MustElement(`[name="customerCnpjCpf"]`).MustInput(invoiceData.ClientCNPJ)
-	page.MustElement(`button[for="opening-balance"]`).MustClick()
-	currencyList := page.MustElement("#prefix-dropdown")
+func (c *crawler) mustFillInvoiceData() {
+	c.page.MustElement(`[name="invoiceCode"]`).MustInput(strconv.Itoa(c.invoiceData.InvoiceCode))
+	c.page.MustElement("#companieName").MustInput(c.invoiceData.Provider)
+	c.page.MustElement(`[data-testid="cnpj"]`).MustInput(c.invoiceData.CNPJ)
+	c.page.MustElement("#address").MustInput(c.invoiceData.Address)
+	c.page.MustElement("#client-email").MustInput(c.invoiceData.Email)
+	c.page.MustElement("#customerName").MustInput(c.invoiceData.Client)
+	c.page.MustElement(`[name="customerCnpjCpf"]`).MustInput(c.invoiceData.ClientCNPJ)
+	c.page.MustElement(`button[for="opening-balance"]`).MustClick()
+	currencyList := c.page.MustElement("#prefix-dropdown")
 	currencies := currencyList.MustElements("li")
 	for _, currency := range currencies {
-		if currency.MustText() == invoiceData.Currency {
+		if currency.MustText() == c.invoiceData.Currency {
 			currency.MustClick()
 			break
 		}
 	}
-	page.MustElement("#opening-balance").MustInput(invoiceData.Amount)
-	page.MustElement("#fatura-vencimento").MustInput(invoiceData.DueDate)
-	page.MustElement(`[name="serviceTitle"]`).MustInput(invoiceData.ServiceTitle)
-	page.MustElement("#description").MustInput(invoiceData.ServiceDescription)
-	page.MustElement(`[name="swiftCode"]`).MustInput(invoiceData.Swift)
-	page.MustElement(`[name="ibanCode"]`).MustInput(invoiceData.Iban)
+	c.page.MustElement("#opening-balance").MustInput(c.invoiceData.Amount)
+	c.page.MustElement("#fatura-vencimento").MustInput(c.invoiceData.DueDate)
+	c.page.MustElement(`[name="serviceTitle"]`).MustInput(c.invoiceData.ServiceTitle)
+	c.page.MustElement("#description").MustInput(c.invoiceData.ServiceDescription)
+	c.page.MustElement(`[name="swiftCode"]`).MustInput(c.invoiceData.Swift)
+	c.page.MustElement(`[name="ibanCode"]`).MustInput(c.invoiceData.Iban)
 }
 
-func clickDownload(page *rod.Page) {
-	pageButtons := page.MustElements(`button`)
+func (c *crawler) clickDownload() (*rod.Element, error) {
+	pageButtons := c.page.MustElements(`button`)
 	for _, pageButton := range pageButtons {
 		if pageButton.MustText() == "Baixar invoice" {
-			pageButton.MustClick()
-			break
+			return pageButton.MustClick(), nil
 		}
 	}
+	return nil, errors.New("Download button not found")
 }
 
-func Run() error {
-	fmt.Println("Reading invoice data from config.json")
-	invoiceData, err := readInvoiceData()
+func (c *crawler) Run() error {
+	fmt.Println("Filling invoice form")
+	c.mustFillInvoiceData()
+	fmt.Println("Downloading invoice")
+	_, err := c.clickDownload()
 	if err != nil {
 		return err
 	}
-	fmt.Println("Starting crawler")
-	page := getInvoicePage()
-	fmt.Println("Filling invoice form")
-	fillInvoiceData(page, invoiceData)
-	fmt.Println("Downloading invoice")
-	clickDownload(page)
 	time.Sleep(3 * time.Second)
 	fmt.Println("Closing")
-	return page.Close()
+	return c.page.Close()
 }

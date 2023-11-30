@@ -1,4 +1,4 @@
-module github.com/raphael-foliveira/invgen
+module github.com/raphael-foliveira/invoice-generator
 
 go 1.21.3
 
