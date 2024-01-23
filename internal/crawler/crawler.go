@@ -19,7 +19,7 @@ type crawler struct {
 	page         *rod.Page
 }
 
-func NewCrawler(invoiceData *InvoiceData, downloadPath string) *crawler {
+func New(invoiceData *InvoiceData, downloadPath string) *crawler {
 	c := &crawler{
 		invoiceData:  *invoiceData,
 		downloadPath: downloadPath,
