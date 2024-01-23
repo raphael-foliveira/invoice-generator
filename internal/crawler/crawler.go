@@ -79,7 +79,7 @@ func (c *crawler) Run() error {
 	fmt.Println("Downloading invoice")
 	_, err := c.clickDownload()
 	if err != nil {
-		return err
+		return fmt.Errorf("crawler.Run: %w", err)
 	}
 	time.Sleep(3 * time.Second)
 	fmt.Println("Closing")
