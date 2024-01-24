@@ -19,7 +19,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Starting crawler")
-	c := crawler.NewCrawler(id, os.Args[1])
+	c := crawler.New(id, os.Args[1])
 	if err := c.Run(); err != nil {
 		panic(err)
 	}
