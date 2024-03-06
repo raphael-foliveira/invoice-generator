@@ -47,14 +47,7 @@ func (c *crawler) mustFillInvoiceData() {
 	c.MustElement("#customerName").MustInput(c.invoiceData.Client)
 	c.MustElement(`[name="customerCnpjCpf"]`).MustInput(c.invoiceData.ClientCNPJ)
 	c.MustElement(`button[for="opening-balance"]`).MustClick()
-	currencyList := c.MustElement("#prefix-dropdown")
-	currencies := currencyList.MustElements("li")
-	for _, currency := range currencies {
-		if currency.MustText() == c.invoiceData.Currency {
-			currency.MustClick()
-			break
-		}
-	}
+	c.selectCurrency()
 	c.MustElement("#opening-balance").MustInput(c.invoiceData.Amount)
 	c.MustElement("#fatura-vencimento").MustInput(c.invoiceData.DueDate)
 	c.MustElement(`[name="serviceTitle"]`).MustInput(c.invoiceData.ServiceTitle)
@@ -70,6 +63,18 @@ func (c *crawler) mustTypeSlowly(selector, text string) {
 		element.MustInput(string(key))
 	}
 	time.Sleep(time.Millisecond * 100)
+}
+
+func (c *crawler) selectCurrency() {
+	currencyList := c.MustElement("#prefix-dropdown")
+	currencies := currencyList.MustElements("li")
+	for _, currency := range currencies {
+		if currency.MustText() == c.invoiceData.Currency {
+			currency.MustClick()
+			break
+		}
+	}
+
 }
 
 func (c *crawler) clickDownload() (*rod.Element, error) {
