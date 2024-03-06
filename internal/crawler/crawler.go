@@ -41,7 +41,7 @@ func (c *crawler) mustGetInvoicePage() {
 func (c *crawler) mustFillInvoiceData() {
 	c.MustElement(`[name="invoiceCode"]`).MustInput(strconv.Itoa(c.invoiceData.InvoiceCode))
 	c.MustElement("#companieName").MustInput(c.invoiceData.Provider)
-	c.MustTypeSlowly(`[data-testid="cnpj"]`, c.invoiceData.CNPJ)
+	c.mustTypeSlowly(`[data-testid="cnpj"]`, c.invoiceData.CNPJ)
 	c.MustElement("#address").MustInput(c.invoiceData.Address)
 	c.MustElement("#client-email").MustInput(c.invoiceData.Email)
 	c.MustElement("#customerName").MustInput(c.invoiceData.Client)
@@ -63,13 +63,13 @@ func (c *crawler) mustFillInvoiceData() {
 	c.MustElement(`[name="ibanCode"]`).MustInput(c.invoiceData.Iban)
 }
 
-func (c *crawler) MustTypeSlowly(selector, text string) {
+func (c *crawler) mustTypeSlowly(selector, text string) {
 	element := c.MustElement(selector)
 	for _, key := range text {
 		time.Sleep(time.Millisecond * 100)
 		element.MustInput(string(key))
 	}
-	time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 100)
 }
 
 func (c *crawler) clickDownload() (*rod.Element, error) {
