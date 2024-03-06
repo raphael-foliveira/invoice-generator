@@ -16,7 +16,7 @@ var invoiceUrl = "https://invoice.agilize.com.br/"
 type crawler struct {
 	invoiceData  InvoiceData
 	downloadPath string
-	page         *rod.Page
+	*rod.Page
 }
 
 func New(invoiceData *InvoiceData, downloadPath string) *crawler {
@@ -35,19 +35,19 @@ func (c *crawler) mustGetInvoicePage() {
 		Behavior:     proto.PageSetDownloadBehaviorBehaviorAllow,
 		DownloadPath: downloadPath,
 	}.Call(browser)
-	c.page = browser.Browser().MustPage(invoiceUrl)
+	c.Page = browser.Browser().MustPage(invoiceUrl)
 }
 
 func (c *crawler) mustFillInvoiceData() {
-	c.page.MustElement(`[name="invoiceCode"]`).MustInput(strconv.Itoa(c.invoiceData.InvoiceCode))
-	c.page.MustElement("#companieName").MustInput(c.invoiceData.Provider)
-	c.page.MustElement(`[data-testid="cnpj"]`).MustInput(c.invoiceData.CNPJ)
-	c.page.MustElement("#address").MustInput(c.invoiceData.Address)
-	c.page.MustElement("#client-email").MustInput(c.invoiceData.Email)
-	c.page.MustElement("#customerName").MustInput(c.invoiceData.Client)
-	c.page.MustElement(`[name="customerCnpjCpf"]`).MustInput(c.invoiceData.ClientCNPJ)
-	c.page.MustElement(`button[for="opening-balance"]`).MustClick()
-	currencyList := c.page.MustElement("#prefix-dropdown")
+	c.MustElement(`[name="invoiceCode"]`).MustInput(strconv.Itoa(c.invoiceData.InvoiceCode))
+	c.MustElement("#companieName").MustInput(c.invoiceData.Provider)
+	c.MustTypeSlowly(`[data-testid="cnpj"]`, c.invoiceData.CNPJ)
+	c.MustElement("#address").MustInput(c.invoiceData.Address)
+	c.MustElement("#client-email").MustInput(c.invoiceData.Email)
+	c.MustElement("#customerName").MustInput(c.invoiceData.Client)
+	c.MustElement(`[name="customerCnpjCpf"]`).MustInput(c.invoiceData.ClientCNPJ)
+	c.MustElement(`button[for="opening-balance"]`).MustClick()
+	currencyList := c.MustElement("#prefix-dropdown")
 	currencies := currencyList.MustElements("li")
 	for _, currency := range currencies {
 		if currency.MustText() == c.invoiceData.Currency {
@@ -55,22 +55,31 @@ func (c *crawler) mustFillInvoiceData() {
 			break
 		}
 	}
-	c.page.MustElement("#opening-balance").MustInput(c.invoiceData.Amount)
-	c.page.MustElement("#fatura-vencimento").MustInput(c.invoiceData.DueDate)
-	c.page.MustElement(`[name="serviceTitle"]`).MustInput(c.invoiceData.ServiceTitle)
-	c.page.MustElement("#description").MustInput(c.invoiceData.ServiceDescription)
-	c.page.MustElement(`[name="swiftCode"]`).MustInput(c.invoiceData.Swift)
-	c.page.MustElement(`[name="ibanCode"]`).MustInput(c.invoiceData.Iban)
+	c.MustElement("#opening-balance").MustInput(c.invoiceData.Amount)
+	c.MustElement("#fatura-vencimento").MustInput(c.invoiceData.DueDate)
+	c.MustElement(`[name="serviceTitle"]`).MustInput(c.invoiceData.ServiceTitle)
+	c.MustElement("#description").MustInput(c.invoiceData.ServiceDescription)
+	c.MustElement(`[name="swiftCode"]`).MustInput(c.invoiceData.Swift)
+	c.MustElement(`[name="ibanCode"]`).MustInput(c.invoiceData.Iban)
+}
+
+func (c *crawler) MustTypeSlowly(selector, text string) {
+	element := c.MustElement(selector)
+	for _, key := range text {
+		time.Sleep(time.Millisecond * 100)
+		element.MustInput(string(key))
+	}
+	time.Sleep(time.Millisecond * 200)
 }
 
 func (c *crawler) clickDownload() (*rod.Element, error) {
-	pageButtons := c.page.MustElements(`button`)
+	pageButtons := c.MustElements(`button`)
 	for _, pageButton := range pageButtons {
 		if pageButton.MustText() == "Baixar invoice" {
 			return pageButton.MustClick(), nil
 		}
 	}
-	return nil, errors.New("Download button not found")
+	return nil, errors.New("download button not found")
 }
 
 func (c *crawler) Run() error {
@@ -83,5 +92,5 @@ func (c *crawler) Run() error {
 	}
 	time.Sleep(3 * time.Second)
 	fmt.Println("Closing")
-	return c.page.Close()
+	return c.Close()
 }
