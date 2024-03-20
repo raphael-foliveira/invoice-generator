@@ -11,7 +11,7 @@ import (
 	"github.com/go-rod/rod/lib/proto"
 )
 
-var invoiceUrl = "https://invoice.agilize.com.br/"
+const invoiceUrl = "https://invoice.agilize.com.br/"
 
 type crawler struct {
 	invoiceData  InvoiceData
