@@ -14,9 +14,9 @@ import (
 const invoiceUrl = "https://invoice.agilize.com.br/"
 
 type crawler struct {
-	invoiceData  InvoiceData
-	downloadPath string
 	*rod.Page
+	downloadPath string
+	invoiceData  InvoiceData
 }
 
 func New(invoiceData *InvoiceData, downloadPath string) *crawler {
@@ -74,7 +74,6 @@ func (c *crawler) selectCurrency() {
 			break
 		}
 	}
-
 }
 
 func (c *crawler) clickDownload() (*rod.Element, error) {
