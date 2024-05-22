@@ -14,14 +14,17 @@ func main() {
 		log.Fatalf("Download path must be provided")
 		return
 	}
+
 	id, err := cfg.ReadInvoiceData()
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println("Starting crawler")
 	c := crawler.New(id, os.Args[1])
 	if err := c.Run(); err != nil {
 		panic(err)
 	}
+
 	fmt.Println("Done")
 }

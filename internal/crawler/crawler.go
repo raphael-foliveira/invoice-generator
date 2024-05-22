@@ -25,6 +25,7 @@ func New(invoiceData *InvoiceData, downloadPath string) *crawler {
 		downloadPath: downloadPath,
 	}
 	c.mustGetInvoicePage()
+
 	return c
 }
 
@@ -58,10 +59,12 @@ func (c *crawler) mustFillInvoiceData() {
 
 func (c *crawler) mustTypeSlowly(selector, text string) {
 	element := c.MustElement(selector)
+
 	for _, key := range text {
 		time.Sleep(time.Millisecond * 100)
 		element.MustInput(string(key))
 	}
+
 	time.Sleep(time.Millisecond * 100)
 }
 
